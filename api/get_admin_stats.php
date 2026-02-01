@@ -2,7 +2,6 @@
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-// Debugowanie
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -18,7 +17,6 @@ try {
     $year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
     $month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
 
-    // 1. PRZYCHODY (Z bazy wizyt)
     $stmtRev = $pdo->prepare("
         SELECT COALESCE(SUM(u.cena), 0) as total_revenue 
         FROM wizyty_users w 
@@ -30,7 +28,6 @@ try {
     $stmtRev->execute([':m' => $month, ':y' => $year]);
     $revenue = $stmtRev->fetch(PDO::FETCH_ASSOC)['total_revenue'];
 
-    // 2. KOSZTY
     $stmtCost = $pdo->prepare("
         SELECT COALESCE(SUM(kwota), 0) as total_costs 
         FROM koszty
@@ -40,7 +37,6 @@ try {
     $stmtCost->execute([':m' => $month, ':y' => $year]);
     $costs = $stmtCost->fetch(PDO::FETCH_ASSOC)['total_costs'];
 
-    // 3. POPULARNE USŁUGI
     $stmtPop = $pdo->prepare("
         SELECT u.nazwa_uslugi as name, COUNT(*) as count 
         FROM wizyty_users w 
@@ -55,11 +51,9 @@ try {
     $stmtPop->execute([':m' => $month, ':y' => $year]);
     $popularServices = $stmtPop->fetchAll(PDO::FETCH_ASSOC);
 
-    // 4. MAGAZYN
     $stmtStock = $pdo->query("SELECT nazwa, marka, stan_magazyn FROM produkty WHERE stan_magazyn <= 5");
     $lowStock = $stmtStock->fetchAll(PDO::FETCH_ASSOC);
 
-    // 5. LISTA FAKTUR (Teraz po prostu lista kosztów z nazwą)
     $stmtInv = $pdo->prepare("
         SELECT id_kosztu, nazwa, kategoria, kwota, data_kosztu 
         FROM koszty 
@@ -70,7 +64,6 @@ try {
     $stmtInv->execute([':m' => $month, ':y' => $year]);
     $invoices = $stmtInv->fetchAll(PDO::FETCH_ASSOC);
 
-    // Usunięto pętlę sprawdzającą pliki, bo plików już nie ma
 
     echo json_encode([
         "revenue" => $revenue,

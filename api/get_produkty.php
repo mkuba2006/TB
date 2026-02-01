@@ -22,7 +22,6 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 
-// POPRAWIONE ZAPYTANIE: Pobieramy CenaPKT (bo tak jest w bazie)
 $sql = "SELECT id_produktu, nazwa, marka, cena, CenaPKT, typ, gwiazdki, ocena, stan_magazyn FROM produkty";
 $result = $conn->query($sql);
 

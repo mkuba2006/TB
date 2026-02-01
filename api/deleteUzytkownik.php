@@ -4,13 +4,11 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json');
 
-// Ustawienia połączenia z bazą danych
 $host = "localhost";
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
 $pass = "kuba2006";
 
-// Funkcja połączenia z bazą danych
 function connectDB($host, $db, $user, $pass) {
     $dsn = "mysql:host=$host;dbname=$db;charset=utf8mb4";
     $options = [
@@ -28,7 +26,6 @@ function connectDB($host, $db, $user, $pass) {
 
 $pdo = connectDB($host, $db, $user, $pass);
 
-// Sprawdzenie, czy ID zostało przekazane
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     http_response_code(400);
     echo json_encode(["error" => "Brak ID użytkownika do usunięcia."]);
@@ -38,7 +35,6 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 $userId = $_GET['id'];
 
 try {
-    // Zapytanie DELETE
     $sql = "DELETE FROM users WHERE id = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':id', $userId, PDO::PARAM_INT);

@@ -45,26 +45,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // 1. Zabezpieczenie danych wejściowych
     $email_plain = $data['email']; 
     $imie = $data['imie']; 
     $telefon = $data['telefon'];
     $haslo_raw = $data['haslo'];
 
-    // 2. Generowanie HASHU DO WYSZUKIWANIA (Searchable Encryption)
-    // Hash jest jawny w bazie, ale nieodwracalny.
     $email_search_hash = hash('sha256', strtolower($email_plain));
     
-    // 3. Szyfrowanie dwukierunkowe dla E-MAILA, IMIENIA i TELEFONU
     $email_encrypted = encrypt_data($email_plain, $encryption_key, $cipher, $iv);
     $imie_encrypted = encrypt_data($imie, $encryption_key, $cipher, $iv);
     $telefon_encrypted = encrypt_data($telefon, $encryption_key, $cipher, $iv);
     
-    // 4. Szyfrowanie hasła (jednokierunkowe)
     $haslo_hashed = password_hash($haslo_raw, PASSWORD_DEFAULT);
-    
-    // Sprawdzenie unikalności dla HASHU E-MAILA
-    // Wyszukujemy po 'email_hash_search', aby sprawdzić, czy użytkownik już istnieje
     $check = $conn->prepare("SELECT id FROM users WHERE email_hash_search = ?");
     $check->bind_param("s", $email_search_hash); 
     $check->execute();

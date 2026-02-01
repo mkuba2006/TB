@@ -4,7 +4,6 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Połączenie
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
@@ -25,9 +24,7 @@ if (!isset($_GET['id'], $_GET['date'], $_GET['duration'])) {
 
 $barberId = intval($_GET['id']);
 $date = $_GET['date'];
-$duration = intval($_GET['duration']); // w minutach
-
-// Pobranie wizyt BARBERA w danym dniu
+$duration = intval($_GET['duration']); 
 $stmt = $conn->prepare("
     SELECT 
         w.godzina_wizyty,
@@ -45,12 +42,11 @@ $result = $stmt->get_result();
 $appointments = [];
 while ($row = $result->fetch_assoc()) {
     $appointments[] = [
-        "start" => $row['godzina_wizyty'],    // HH:MM:SS
-        "duration" => $row['czas_wizyty']     // HH:MM:SS
+        "start" => $row['godzina_wizyty'],
+        "duration" => $row['czas_wizyty']
     ];
 }
 
-// Zamiana HH:MM:SS → minuty
 function timeToMinutes($time)
 {
     list($h, $m) = explode(":", substr($time, 0, 5));

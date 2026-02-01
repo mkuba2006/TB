@@ -22,11 +22,7 @@ if ($conn->connect_error) {
   exit;
 }
 
-// === USTAWIENIA ŚCIEŻEK ===
-// Ścieżka fizyczna do folderu ze zdjęciami (względem pliku API)
-// Zakładamy, że api jest w /public_html/api/ a zdjęcia w /public_html/ted/assets/ObrazyBarberow/
 $imgDir = "../ted/assets/ObrazyBarberow/";
-// URL publiczny do folderu zdjęć (do wyświetlania w React)
 $imgUrlBase = "https://jmdeveloper.pl/ted/assets/ObrazyBarberow/";
 
 $sql = "
@@ -63,22 +59,15 @@ if ($result) {
             }
         }
 
-        // === LOGIKA ZDJĘĆ ===
-        // Szukamy plików zaczynających się od imienia (np. adrian-mini.*)
-        // Używamy glob, aby znaleźć dowolne rozszerzenie (jpg, png, svg)
-        $imieLower = strtolower($row['imie']); // Pliki są małymi literami np. adrian-mini.png
-
-        // Szukaj MINI
+        $imieLower = strtolower($row['imie']);
         $miniFiles = glob($imgDir . $imieLower . "-mini.*");
         if (!empty($miniFiles)) {
-            // Pobieramy nazwę pliku z pełnej ścieżki
             $fileName = basename($miniFiles[0]);
-            $row['img_mini'] = $imgUrlBase . $fileName . "?t=" . time(); // time() zapobiega cache'owaniu
+            $row['img_mini'] = $imgUrlBase . $fileName . "?t=" . time(); 
         } else {
             $row['img_mini'] = null;
         }
 
-        // Szukaj BIG
         $bigFiles = glob($imgDir . $imieLower . "-big.*");
         if (!empty($bigFiles)) {
             $fileName = basename($bigFiles[0]);

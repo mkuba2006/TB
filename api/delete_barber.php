@@ -1,7 +1,4 @@
 <?php
-// delete_barber.php
-
-// 1. Konfiguracja i CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -12,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// 2. UWZGLĘDNIONE TWOJE DANE LOGOWANIA
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
@@ -26,7 +22,6 @@ try {
     exit;
 }
 
-// 3. Pobranie danych wejściowych
 $data = json_decode(file_get_contents("php://input"), true);
 $id_barbera = $data['id_barbera'] ?? null;
 
@@ -36,7 +31,6 @@ if (!$id_barbera) {
 }
 
 try {
-    // 4. Pobranie imienia barbera, aby usunąć jego pliki zdjęć
     $stmt = $pdo->prepare("SELECT imie FROM barberzy WHERE id_barbera = :id");
     $stmt->bindParam(':id', $id_barbera);
     $stmt->execute();
@@ -44,13 +38,8 @@ try {
 
     if ($barber) {
         $imie = strtolower($barber['imie']);
-        // Ścieżka do zdjęć - dostosuj jeśli masz inną strukturę folderów
         $targetDir = "../ted/assets/ObrazyBarberow/"; 
-        
-        // Lista możliwych rozszerzeń, jakie obsługuje system
         $extensions = ['png', 'jpg', 'jpeg', 'webp'];
-        
-        // Próba usunięcia wersji mini i big
         foreach ($extensions as $ext) {
             $miniFile = $targetDir . $imie . "-mini." . $ext;
             $bigFile = $targetDir . $imie . "-big." . $ext;
@@ -59,14 +48,10 @@ try {
             if (file_exists($bigFile)) { @unlink($bigFile); }
         }
     }
-
-    // 5. Usuwanie z bazy danych
-    // Najpierw usuwamy urlopy tego barbera (tabela dezaktywacje)
     $delUrlopy = $pdo->prepare("DELETE FROM dezaktywacje WHERE id_barbera = :id");
     $delUrlopy->bindParam(':id', $id_barbera);
     $delUrlopy->execute();
 
-    // Następnie usuwamy samego barbera
     $sql = "DELETE FROM barberzy WHERE id_barbera = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':id', $id_barbera);
@@ -75,7 +60,6 @@ try {
     echo json_encode(["success" => true, "message" => "Barber i jego zdjęcia zostały usunięte."]);
 
 } catch (PDOException $e) {
-    // Obsługa błędu klucza obcego (jeśli barber ma przypisane wizyty)
     if ($e->getCode() == '23000') {
         echo json_encode([
             "success" => false, 

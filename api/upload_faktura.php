@@ -1,5 +1,4 @@
 <?php
-// Raportowanie błędów
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -36,25 +35,19 @@ try {
     $stmt->execute([$nazwa, $kategoria, $kwota, $data_kosztu]);
     $lastId = $pdo->lastInsertId();
 
-    // === 2. GENEROWANIE PLIKU TXT ===
     $targetDir = "../faktury/";
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0755, true);
     }
 
-    // --- KLUCZOWA POPRAWKA NAZWY PLIKU ---
-    // 1. Zamiana polskich znaków na łacińskie (np. Próbka -> Probka)
     $cleanName = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $nazwa);
-    // 2. Usunięcie wszystkiego co nie jest literą, cyfrą, podkreślnikiem lub myślnikiem
     $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', $cleanName);
     
     $datePart = str_replace('-', '', $data_kosztu); 
     
-    // Budujemy nazwę: koszt_ID_DATA_NAZWA.txt
     $fileName = "koszt_" . $lastId . "_" . $datePart . "_" . $safeName . ".txt";
     $filePath = $targetDir . $fileName;
 
-    // Treść pliku
     $content = "DOKUMENT KOSZTOWY NR: " . $lastId . "\n";
     $content .= "---------------------------\n";
     $content .= "Nazwa: " . $nazwa . "\n";

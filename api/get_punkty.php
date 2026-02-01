@@ -25,7 +25,6 @@ if ($conn->connect_error) {
     echo json_encode(["error" => "Błąd połączenia z bazą: " . $conn->connect_error]);
     exit;
 }
-// Bardzo ważne przy kolumnach z "ż" "ł" itp.
 $conn->set_charset("utf8mb4");
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
@@ -36,8 +35,6 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $userId = (int)$_GET['id'];
 
-// --- ZAPYTANIE 1: PUNKTY Z WIZYT ---
-// Poprawka: Używamy backticków ` wokół id_użytkownika, bo na zdjęciu widać polski znak "ż"
 $sql_punkty = "
     SELECT SUM(u.ile_pkt) AS suma_pkt
     FROM wizyty_users w
@@ -59,16 +56,12 @@ $row1 = $result1->fetch_assoc();
 $suma_pkt = (int)($row1['suma_pkt'] ?? 0);
 $stmt1->close();
 
-// --- ZAPYTANIE 2: PUNKTY WYDANE NA PRODUKTY ---
-// Poprawka: W tabeli produkty kolumna nazywa się CenaPKT (wg zdjęcia), a nie ile_pkt
 $sql_wydane = "
     SELECT COALESCE(SUM(CASE WHEN z.status_zamowienia IN ('oczekujące','zrealizowane', 'Do odbioru') THEN p.CenaPKT ELSE 0 END), 0) AS wydane_pkt
     FROM zamowienia z
     JOIN produkty p ON z.id_produktu = p.id_produktu
     WHERE z.id_uzytkownika = ?
 ";
-// UWAGA: Tutaj założyłem, że w tabeli 'zamowienia' kolumna nazywa się standardowo 'id_uzytkownika' (bez ż).
-// Jeśli w zamówieniach też masz 'id_użytkownika' z 'ż', musisz zmienić powyższą linijkę na: WHERE z.`id_użytkownika` = ?
 
 $stmt2 = $conn->prepare($sql_wydane);
 if (!$stmt2) {
@@ -85,7 +78,6 @@ $stmt2->close();
 
 $conn->close();
 
-// Obliczenie wyniku
 $punkty = max(0, $suma_pkt - $wydane_pkt);
 
 echo json_encode(["punkty" => $punkty]);

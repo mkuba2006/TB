@@ -1,5 +1,4 @@
 <?php
-// Te nagłówki naprawiają błąd CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -10,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   exit;
 }
 
-// === KONFIGURACJA BAZY DANYCH ===
 $host = "localhost";
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
@@ -24,14 +22,8 @@ if ($conn->connect_error) {
   exit;
 }
 
-// === ŚCIEŻKI DO PLIKÓW ===
-// Ścieżka fizyczna (gdzie szukać plików na dysku serwera)
 $imgDir = "../ted/assets/ObrazyBarberow/";
-
-// Ścieżka URL (co zwracać do Reacta)
 $imgUrlBase = "https://jmdeveloper.pl/ted/assets/ObrazyBarberow/";
-
-// === POBIERANIE DANYCH ===
 $sql = "
 SELECT 
   b.id_barbera,
@@ -55,7 +47,6 @@ $barberzy_dane = [];
 
 if ($result) {
     while ($row = $result->fetch_assoc()) {
-        // 1. Czyszczenie NULLi
         foreach ($row as $key => $val) {
             if ($val === null) {
                 if (strpos($key, 'level') !== false || $key === 'rating') {
@@ -66,11 +57,9 @@ if ($result) {
             }
         }
 
-        // === 2. LOGIKA ZDJĘĆ ===
-        $imieLower = strtolower($row['imie']); // np. julia
-        $imieCap   = ucfirst($imieLower);      // np. Julia (dla plików SVG)
+        $imieLower = strtolower($row['imie']); 
+        $imieCap   = ucfirst($imieLower);     
 
-        // A. Szukamy NAPISU (Poster)
         $napisFiles = glob($imgDir . $imieCap . "-napis.svg");
         if (empty($napisFiles)) {
              $napisFiles = glob($imgDir . $imieLower . "-napis.svg");
@@ -79,13 +68,11 @@ if ($result) {
             ? $imgUrlBase . basename($napisFiles[0]) . "?t=" . time() 
             : null;
 
-        // B. Szukamy ZDJĘCIA BIG
         $bigFiles = glob($imgDir . $imieLower . "-big.*");
         $row['img_big'] = !empty($bigFiles) 
             ? $imgUrlBase . basename($bigFiles[0]) . "?t=" . time() 
             : null;
 
-        // C. Szukamy ZDJĘCIA MINI
         $miniFiles = glob($imgDir . $imieLower . "-mini.*");
         $row['img_mini'] = !empty($miniFiles) 
             ? $imgUrlBase . basename($miniFiles[0]) . "?t=" . time() 

@@ -1,10 +1,8 @@
 <?php
-// CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -12,7 +10,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 header('Content-Type: application/json');
 
-// --- Połączenie z bazą ---
 $host = "localhost";
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
@@ -26,7 +23,6 @@ try {
     exit();
 }
 
-// Pobranie danych JSON z POST
 $data = json_decode(file_get_contents("php://input"), true);
 
 $email = $data['email'] ?? '';
@@ -37,7 +33,6 @@ if (!$email || !$haslo) {
     exit();
 }
 
-// Zapytanie o barbera
 $stmt = $pdo->prepare("
     SELECT id_barbera, imie, mail, haslo
     FROM barberzy
@@ -52,7 +47,6 @@ $stmt->execute([
 
 $barber = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Zwrot danych
 if ($barber) {
     echo json_encode([
         "success" => true,

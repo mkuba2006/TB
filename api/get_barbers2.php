@@ -4,13 +4,11 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Dane do połączenia z bazą
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
 $pass = "kuba2006";
 
-// Połączenie z bazą
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     http_response_code(500);
@@ -18,14 +16,12 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Obsługa tylko GET
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);
     echo json_encode(["error" => "Tylko metoda GET jest dozwolona"]);
     exit;
 }
 
-// Zapytanie SQL
 $sql = "
     SELECT b.id_barbera, b.imie, u.nazwa_uslugi, u.ile_pkt
     FROM barberzy b
@@ -42,7 +38,6 @@ if (!$result) {
     exit;
 }
 
-// Grupowanie usług po barberze
 $data = [];
 while ($row = $result->fetch_assoc()) {
     $id = $row['id_barbera'];
@@ -63,7 +58,6 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 
-// Zwracamy wynik jako lista barberów z ich usługami
 echo json_encode(array_values($data));
 
 $conn->close();

@@ -30,7 +30,6 @@ if (empty($id_barbera) || empty($nazwa_uslugi) || empty($cena) || empty($ile_pkt
 }
 
 try {
-    // ZAKTUALIZOWANE ZAPYTANIE - dodano kolumnę 'cena'
     $sql = "
         INSERT INTO uslugi (id_barbera, nazwa_uslugi, cena, ile_pkt, czas_wizyty) 
         VALUES (:id_barbera, :nazwa_uslugi, :cena, :ile_pkt, :czas_wizyty)
@@ -40,7 +39,7 @@ try {
     
     $stmt->bindParam(':id_barbera', $id_barbera, PDO::PARAM_INT);
     $stmt->bindParam(':nazwa_uslugi', $nazwa_uslugi);
-    $stmt->bindParam(':cena', $cena);          // Bindowanie ceny
+    $stmt->bindParam(':cena', $cena);
     $stmt->bindParam(':ile_pkt', $ile_pkt, PDO::PARAM_INT);
     $stmt->bindParam(':czas_wizyty', $czas_wizyty);
     

@@ -1,5 +1,4 @@
 <?php
-// Wymuszenie raportowania błędów (dla pewności)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -7,7 +6,6 @@ error_reporting(E_ALL);
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-// --- KONFIGURACJA SZYFROWANIA (Zostawiam Twoje ustawienia) ---
 $encryption_key = "TwojBardzoSilnyTajemnyKlucz256Bit"; 
 $cipher = "AES-256-CBC";
 $iv_length = openssl_cipher_iv_length($cipher);
@@ -19,7 +17,6 @@ function decrypt_data($encrypted_data, $key, $cipher, $iv) {
     return $decrypted !== false ? $decrypted : $encrypted_data;
 }
 
-// --- POŁĄCZENIE Z BAZĄ ---
 $host = "localhost"; 
 $db = "host574875_TEST"; 
 $user = "host574875_kuba"; 
@@ -28,10 +25,6 @@ $pass = "kuba2006";
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // =================================================================
-    // KROK 1: POBIERANIE KOLUMN (BARBERZY) - Z tabeli widocznej na screenie
-    // =================================================================
     $sql_resources = "SELECT id_barbera, imie FROM barberzy ORDER BY id_barbera ASC";
     $stmt_res = $pdo->prepare($sql_resources);
     $stmt_res->execute();
@@ -40,14 +33,11 @@ try {
     $resources = [];
     foreach ($raw_resources as $res) {
         $resources[] = [
-            'id' => (int)$res['id_barbera'], // Rzutowanie na INT jest kluczowe!
+            'id' => (int)$res['id_barbera'], 
             'title' => $res['imie']
         ];
     }
 
-    // =================================================================
-    // KROK 2: POBIERANIE WIZYT (EVENTS) - Łączenie przez tabele 'uslugi'
-    // =================================================================
     $sql_events = "
         SELECT 
             w.id_wizyty,
@@ -72,18 +62,15 @@ try {
     $events = [];
 
     foreach ($wizyty as $w) {
-        // Deszyfrowanie
         $imie = decrypt_data($w['imie_encrypted'], $encryption_key, $cipher, $iv);
         $email = decrypt_data($w['email_encrypted'], $encryption_key, $cipher, $iv);
         $telefon = decrypt_data($w['telefon_encrypted'], $encryption_key, $cipher, $iv);
 
-        // Data Start
         $startStr = $w['data_wizyty'] . ' ' . $w['godzina_wizyty'];
         try {
             $start = new DateTime($startStr);
         } catch (Exception $e) { continue; }
 
-        // Data Koniec (parsowanie czasu trwania np. 01:00:00)
         $czasParts = explode(':', $w['czas_trwania']); 
         $minutes = 60; 
         if (count($czasParts) >= 2) {
@@ -95,7 +82,7 @@ try {
 
         $events[] = [
             'id' => (int)$w['id_wizyty'],
-            'resourceId' => (int)$w['id_barbera'], // To wrzuci wizytę do kolumny barbera
+            'resourceId' => (int)$w['id_barbera'],
             'title' => $imie . ' - ' . $w['nazwa_uslugi'], 
             'start' => $start->format('Y-m-d\TH:i:s'),
             'end' => $end->format('Y-m-d\TH:i:s'),
@@ -105,7 +92,6 @@ try {
         ];
     }
 
-    // Zwracamy komplet danych
     echo json_encode([
         "events" => $events,
         "resources" => $resources

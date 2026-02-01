@@ -36,10 +36,6 @@ if (!$id) {
     exit;
 }
 
-// --- POPRAWIONE ZAPYTANIE ---
-// 1. Usunięto p.zdjecie (bo taka kolumna nie istnieje w bazie)
-// 2. Użyto p.CenaPKT AS ile_pkt (zgodnie z nazwą kolumny w bazie)
-// 3. id_uzytkownika w tabeli zamowienia jest bez "ż"
 $sql = "
     SELECT 
         z.id_zamowienia,

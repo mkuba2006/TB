@@ -3,20 +3,16 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-
-// Obsługa zapytań wstępnych OPTIONS (CORS)
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
 
-// Dane do połączenia z bazą
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
 $pass = "kuba2006";
 
-// Połączenie z bazą
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     http_response_code(500);
@@ -24,10 +20,8 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Ustawienie kodowania znaków na UTF-8 dla poprawnych polskich liter
 $conn->set_charset("utf8mb4");
 
-// Sprawdzenie parametru id_barbera
 if (!isset($_GET['id'])) {
     http_response_code(400);
     echo json_encode(["error" => "Brak parametru id"]);
@@ -36,7 +30,6 @@ if (!isset($_GET['id'])) {
 
 $id_barbera = intval($_GET['id']);
 
-// POPRAWIONE ZAPYTANIE: Dodano kolumnę 'cena'
 $sql = "SELECT id_uslugi, id_barbera, nazwa_uslugi, cena, ile_pkt, czas_wizyty
         FROM uslugi 
         WHERE id_barbera = ?";
@@ -54,12 +47,10 @@ $result = $stmt->get_result();
 
 $services = [];
 while ($row = $result->fetch_assoc()) {
-    // Formatowanie ceny do 2 miejsc po przecinku, jeśli baza tego nie robi automatycznie
     $row['cena'] = number_format((float)$row['cena'], 2, '.', '');
     $services[] = $row;
 }
 
-// Zwracamy tablicę usług
 echo json_encode($services);
 
 $stmt->close();

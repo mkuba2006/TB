@@ -4,7 +4,6 @@ header("Access-Control-Allow-Methods: POST, OPTIONS, DELETE");
 header("Access-Control-Allow-Headers: Content-Type");
 header('Content-Type: application/json');
 
-// Ustawienia bazy danych 
 $host = "localhost";
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
@@ -26,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 try {
     $pdo = new PDO($dsn, $user, $pass, $options);
     
-    // Logika pobierania ID (obsługa DELETE/GET/POST)
     $userId = null;
     if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
         $data = json_decode(file_get_contents("php://input"), true);
@@ -47,7 +45,6 @@ try {
         exit;
     }
 
-    // Wykonanie zapytania DELETE
     $stmt = $pdo->prepare("DELETE FROM usurs WHERE id = ?");
     $stmt->execute([$userId]);
     

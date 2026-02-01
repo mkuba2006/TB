@@ -17,7 +17,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $response = array("success" => false, "message" => "", "error" => "");
 
 try {
-    // 3. Połączenie z bazą
     $host = "localhost";
     $db   = "host574875_TEST";
     $user = "host574875_kuba";
@@ -30,7 +29,6 @@ try {
     }
     $conn->set_charset("utf8mb4");
 
-    // 4. Pobranie danych
     if (empty($_POST['nazwa']) || empty($_POST['marka']) || empty($_POST['cena'])) {
         throw new Exception("Brak wymaganych danych (Nazwa, Marka lub Cena).");
     }
@@ -46,7 +44,6 @@ try {
     $ocena        = isset($_POST['ocena']) ? (float)$_POST['ocena'] : 5.0;
     $status       = isset($_POST['status']) ? trim($_POST['status']) : "OK";
 
-    // 5. OBSŁUGA ZDJĘCIA (Z zachowaniem wielkości liter i polskich znaków)
     if (isset($_FILES['zdjecie']) && $_FILES['zdjecie']['error'] === UPLOAD_ERR_OK) {
         
         $targetDir = "../ted/assets/ObrazyProduktow/"; 
@@ -59,32 +56,24 @@ try {
 
         $fileExt = pathinfo($_FILES["zdjecie"]["name"], PATHINFO_EXTENSION);
         
-        // 1. Łączymy markę i nazwę (Dokładnie tak jak wpisano)
         $rawName = $marka . "_" . $nazwa; 
         
-        // --- USUNIĘTO mb_strtolower ABY ZACHOWAĆ DUŻE LITERY ---
 
-        // 2. Zamieniamy spacje na podkreślniki
         $safeName = str_replace(' ', '_', $rawName);
 
-        // 3. Czyścimy nazwę, ale ZOSTAWIAMY litery (duże i małe, w tym polskie)
-        // Regex /[^\\p{L}\\p{N}_-]+/u usuwa wszystko co nie jest literą, cyfrą, _ lub -
         $safeName = preg_replace('/[^\p{L}\p{N}_-]+/u', '', $safeName);
 
-        // 4. Usuwamy ewentualne podwójne podkreślniki
         $safeName = preg_replace('/_+/', '_', $safeName);
         $safeName = trim($safeName, '_');
 
         $finalFileName = $safeName . "." . $fileExt;
         $targetFile = $targetDir . $finalFileName;
 
-        // Przenoszenie pliku
         if (!move_uploaded_file($_FILES["zdjecie"]["tmp_name"], $targetFile)) {
             throw new Exception("Błąd zapisu pliku na serwerze.");
         }
     }
 
-    // 6. INSERT DO BAZY
     $sql = "INSERT INTO produkty (
                 nazwa, 
                 marka, 

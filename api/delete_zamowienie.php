@@ -33,9 +33,6 @@ if (empty($id_zamowienia)) {
 
 try {
     $pdo->beginTransaction();
-
-    // 1. Pobieramy dane o zamówieniu, żeby wiedzieć co oddać
-    // (Joinujemy produkty, żeby znać aktualną CenęPKT)
     $sqlInfo = "
         SELECT 
             z.id_zamowienia,
@@ -57,7 +54,6 @@ try {
         $id_produktu = $orderInfo['id_produktu'];
         $koszt_punktowy = $orderInfo['CenaPKT'] ?? 0;
 
-        // 3. PRZYWRACAMY TOWAR NA MAGAZYN
         if ($id_produktu) {
             $stmtRestock = $pdo->prepare("UPDATE produkty SET stan_magazyn = stan_magazyn + 1 WHERE id_produktu = :pid");
             $stmtRestock->bindParam(':pid', $id_produktu, PDO::PARAM_INT);

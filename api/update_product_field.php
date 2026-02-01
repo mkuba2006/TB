@@ -16,10 +16,9 @@ try {
     $data = json_decode(file_get_contents("php://input"), true);
 
     $id = $data['id_produktu'];
-    $field = $data['field']; // 'cena', 'CenaPKT' lub 'stan_magazyn'
+    $field = $data['field']; 
     $value = $data['value'];
 
-    // Walidacja nazwy pola dla bezpieczeństwa
     $allowedFields = ['cena', 'CenaPKT', 'stan_magazyn'];
     if (!in_array($field, $allowedFields)) {
         throw new Exception("Nieprawidłowe pole.");

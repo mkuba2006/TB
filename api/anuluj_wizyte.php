@@ -15,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-// Dane do połączenia z bazą
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
@@ -28,7 +27,6 @@ if ($conn->connect_error) {
     exit;
 }
 
-// Pobranie danych z ciała żądania JSON
 $json_data = file_get_contents("php://input");
 $data = json_decode($json_data);
 
@@ -39,21 +37,17 @@ if ($id <= 0) {
     exit;
 }
 
-// ZMIANA: Zapytanie UPDATE zmienia status zamiast usuwać rekord
 $nowy_status = "Anulowana";
 $stmt = $conn->prepare("UPDATE wizyty_users SET status = ? WHERE id_wizyty = ?");
-// 'si' oznacza, że pierwszy parametr ($nowy_status) jest stringiem, a drugi ($id) integerem
 $stmt->bind_param("si", $nowy_status, $id);
 
 if ($stmt->execute()) {
     if ($stmt->affected_rows > 0) {
         echo json_encode(['success' => true, 'message' => 'Status wizyty został zmieniony na Anulowana.']);
     } else {
-        // Jeśli 0 wierszy zostało zmienionych (albo ID nie istnieje, albo status już był 'Anulowana')
         echo json_encode(['success' => false, 'message' => 'Nie znaleziono wizyty o podanym ID lub status był już Anulowana.']);
     }
 } else {
-    // Błąd wykonania zapytania SQL
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Błąd przy aktualizacji statusu wizyty: ' . $stmt->error]);
 }

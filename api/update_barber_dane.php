@@ -16,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $response = ["success" => false, "debug" => []];
 
-// === 1. POŁĄCZENIE Z BAZĄ ===
 $host = "localhost";
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
@@ -30,14 +29,12 @@ if ($conn->connect_error) {
     exit;
 }
 
-// === 2. WALIDACJA ===
 if (!isset($_POST["id_barbera"])) {
     echo json_encode(["success" => false, "error" => "Brak ID barbera"]);
     exit;
 }
 $id = intval($_POST["id_barbera"]);
 
-// === 3. SQL (TEKST) ===
 $check = $conn->query("SELECT id_barbera FROM barberzy_dane WHERE id_barbera = $id");
 if ($check->num_rows == 0) {
     $conn->query("INSERT INTO barberzy_dane (id_barbera) VALUES ($id)");
@@ -80,7 +77,6 @@ if (!$stmt->execute()) {
 $stmt->close();
 $conn->close();
 
-// === 4. PLIKI (USUWANIE wszystkiego co ma myślnik LUB podłogę) ===
 
 $baseDir = $_SERVER['DOCUMENT_ROOT'];
 $uploadDir = $baseDir . '/ted/assets/ObrazyBarberow/';
@@ -98,17 +94,12 @@ function replacePhoto($fileKey, $suffix, $uploadDir, $imieClean, &$response) {
         return false;
     }
 
-    // 1. Definiujemy oba wzorce nazw (z podłogą i myślnikiem)
-    // Wzorzec 1: krystian_big.*
     $patternUnderscore = $uploadDir . $imieClean . '_' . $suffix . ".*";
-    // Wzorzec 2: krystian-big.* (TO USUNIE TEGO ZŁEGO WEBP)
     $patternDash       = $uploadDir . $imieClean . '-' . $suffix . ".*";
 
-    // 2. Szukamy plików
     $filesUnderscore = glob($patternUnderscore);
     $filesDash       = glob($patternDash);
 
-    // Łączymy wyniki wyszukiwania (zabezpieczenie jeśli glob zwróci false)
     if (!$filesUnderscore) $filesUnderscore = [];
     if (!$filesDash)       $filesDash = [];
     
@@ -116,7 +107,6 @@ function replacePhoto($fileKey, $suffix, $uploadDir, $imieClean, &$response) {
 
     $response['debug'][] = "Szukam: " . basename($patternUnderscore) . " ORAZ " . basename($patternDash);
 
-    // 3. Kasujemy wszystko co znaleźliśmy
     if (!empty($filesToDelete)) {
         foreach ($filesToDelete as $file) {
             if (is_file($file)) {
@@ -129,7 +119,6 @@ function replacePhoto($fileKey, $suffix, $uploadDir, $imieClean, &$response) {
         }
     }
 
-    // 4. Wgrywamy nowy plik (zawsze z PODŁOGĄ, żeby trzymać porządek)
     $ext = pathinfo($_FILES[$fileKey]['name'], PATHINFO_EXTENSION);
     $targetName = $imieClean . '-' . $suffix . '.' . $ext;
     $targetPath = $uploadDir . $targetName;

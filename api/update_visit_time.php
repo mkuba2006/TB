@@ -20,7 +20,6 @@ function logger($msg) {
     file_put_contents('debug.txt', date('[Y-m-d H:i:s] ') . $msg . "\n", FILE_APPEND);
 }
 
-// --- KONFIGURACJA BAZY I SZYFROWANIA ---
 $host = "localhost"; 
 $db = "host574875_TEST"; 
 $user = "host574875_kuba"; 
@@ -36,7 +35,6 @@ function decrypt_data($data, $key, $cipher, $iv) {
     return openssl_decrypt(base64_decode($data), $cipher, $key, 0, $iv);
 }
 
-// --- GŁÓWNA LOGIKA ---
 try {
     $input = file_get_contents("php://input");
     $data = json_decode($input, true);
@@ -57,9 +55,8 @@ try {
     $dateObj->setTimezone(new DateTimeZone('Europe/Warsaw')); 
     $data_wizyty = $dateObj->format('Y-m-d');
     $godzina_wizyty = $dateObj->format('H:i:s');
-    $pelna_data = $dateObj->format('Y-m-d H:i'); // Format do maila
+    $pelna_data = $dateObj->format('Y-m-d H:i'); 
 
-    // Aktualizacja w bazie
     $sql = "UPDATE wizyty_users SET data_wizyty = :d, godzina_wizyty = :t WHERE id_wizyty = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':d' => $data_wizyty, ':t' => $godzina_wizyty, ':id' => $id_wizyty]);
@@ -81,16 +78,12 @@ try {
             $decrypted_imie = decrypt_data($client['imie'], $encryption_key, $cipher, $iv);
 
             if (!empty($decrypted_email)) {
-                // --- KONFIGURACJA MAILA ---
-                
-                // 1. ADRESY
                 $server_sender_email = "no-reply@jmdeveloper.pl"; 
-                $reply_to_email = "TedBarber@gmail.com"; // Tu odpisze klient
+                $reply_to_email = "TedBarber@gmail.com";
                 $sender_name = "TedBarber";
 
                 $subject = "📅 Zmiana godziny wizyty - Twój Barber";
 
-                // 2. TREŚĆ HTML
                 $message_html = '
                 <html>
                 <head>
@@ -120,15 +113,11 @@ try {
                 </html>
                 ';
 
-                // 3. NAGŁÓWKI
                 $headers  = "MIME-Version: 1.0" . "\r\n";
                 $headers .= "Content-Type: text/html; charset=UTF-8" . "\r\n";
                 $headers .= "From: $sender_name <$server_sender_email>" . "\r\n";
                 $headers .= "Reply-To: $reply_to_email" . "\r\n";
                 $headers .= "X-Mailer: PHP/" . phpversion();
-
-                // 4. WYSYŁKA Z PARAMETREM -f (NAPRAWA SPAMU)
-                // Wymusza ustawienie Envelope Sender na domenę jmdeveloper.pl
                 $params = "-f" . $server_sender_email;
 
                 if(mail($decrypted_email, $subject, $message_html, $headers, $params)) {

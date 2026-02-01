@@ -4,13 +4,11 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Dane do połączenia z bazą
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
 $pass = "kuba2006";
 
-// Połączenie z bazą
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     http_response_code(500);

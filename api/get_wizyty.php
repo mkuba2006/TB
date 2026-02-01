@@ -4,13 +4,11 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// Dane do połączenia z bazą
 $host = "localhost";
 $db = "host574875_TEST";
 $user = "host574875_kuba";
 $pass = "kuba2006";
 
-// Połączenie z bazą
 $conn = new mysqli($host, $user, $pass, $db);
 if ($conn->connect_error) {
     http_response_code(500);
@@ -25,15 +23,6 @@ if (!isset($_GET['id'])) {
 }
 
 $id_uzytkownika = intval($_GET['id']); 
-
-// $sql = "
-//     SELECT  wizyty.*,  uslugi.id_uslugi AS id_uslugi, uslugi.nazwa_uslugi,  uslugi.ile_pkt,  barberzy.imie AS imie_barbera
-//     FROM wizyty
-//     LEFT JOIN uslugi ON wizyty.id_uslugi = uslugi.id_uslugi
-//     LEFT JOIN barberzy ON uslugi.id_barbera = barberzy.id_barbera
-//     WHERE wizyty.`id_użytkownika` = ?
-//     ORDER BY wizyty.data_wizyty DESC
-// ";
 
 $sql = "
     SELECT  wizyty_users.*,  
@@ -63,10 +52,8 @@ while ($row = $result->fetch_assoc()) {
     $wizyty[] = $row;
 }
 
-// Zwróć dane jako JSON
 echo json_encode($wizyty);
 
-// Zamknij połączenie
 $stmt->close();
 $conn->close();
 ?>

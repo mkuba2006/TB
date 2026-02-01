@@ -25,34 +25,27 @@ try {
         exit;
     }
 
-    // 1. Pobierz prowizję barbera
     $stmtUser = $pdo->prepare("SELECT prowizja FROM barberzy WHERE id_barbera = :id");
     $stmtUser->execute([':id' => $id_barbera]);
     $barber = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
     $prowizja = $barber ? floatval($barber['prowizja']) : 0;
 
-    // 2. Przygotuj warunek czasowy w zależności od wybranego zakresu
     $dateCondition = "";
     
     switch ($zakres) {
         case 'dzien':
-            // Tylko dzisiejsza data
             $dateCondition = "AND DATE(w.data_wizyty) = CURRENT_DATE()";
             break;
         case 'tydzien':
-            // Obecny tydzień (Poniedziałek - Niedziela)
-            // YEARWEEK(..., 1) wymusza start tygodnia w poniedziałek
             $dateCondition = "AND YEARWEEK(w.data_wizyty, 1) = YEARWEEK(CURRENT_DATE(), 1)";
             break;
         case 'miesiac':
         default:
-            // Obecny miesiąc
             $dateCondition = "AND MONTH(w.data_wizyty) = MONTH(CURRENT_DATE()) AND YEAR(w.data_wizyty) = YEAR(CURRENT_DATE())";
             break;
     }
 
-    // 3. Policz wizyty i utarg z uwzględnieniem warunku czasowego
     $sql = "
         SELECT 
             COUNT(*) as ile_wizyt,
@@ -71,7 +64,6 @@ try {
     $ile_wizyt = $stats['ile_wizyt'];
     $utarg = floatval($stats['utarg_calkowity']);
 
-    // 4. Oblicz zarobek
     $zarobek = $utarg * ($prowizja / 100);
 
     echo json_encode([

@@ -18,17 +18,15 @@ try {
 $data = json_decode(file_get_contents("php://input"), true);
 
 $id_uslugi = $data['id_uslugi'] ?? null;
-$field = $data['field'] ?? null; // 'cena' lub 'ile_pkt'
+$field = $data['field'] ?? null; 
 $value = $data['value'] ?? null;
 
-// Walidacja podstawowa
 if (empty($id_uslugi) || empty($field) || !isset($value)) {
     http_response_code(400);
     echo json_encode(["success" => false, "error" => "Brak danych do aktualizacji."]);
     exit;
 }
 
-// Zabezpieczenie przed SQL Injection w nazwie kolumny (tylko dozwolone pola)
 $allowedFields = ['cena', 'ile_pkt'];
 if (!in_array($field, $allowedFields)) {
     http_response_code(400);
@@ -37,7 +35,6 @@ if (!in_array($field, $allowedFields)) {
 }
 
 try {
-    // Dynamiczne zapytanie SQL z bezpieczną nazwą kolumny
     $sql = "UPDATE uslugi SET $field = :value WHERE id_uslugi = :id_uslugi";
     $stmt = $pdo->prepare($sql);
     

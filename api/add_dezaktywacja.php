@@ -24,7 +24,6 @@ $id_barbera = $data['id_barbera'] ?? null;
 $data_od = $data['data_od'] ?? null;
 $data_do = $data['data_do'] ?? null;
 
-// Walidacja
 if (empty($id_barbera) || empty($data_od) || empty($data_do)) {
     http_response_code(400);
     echo json_encode(["success" => false, "error" => "Brak danych."]);
@@ -38,10 +37,8 @@ if ($data_od > $data_do) {
 }
 
 try {
-    // Rozpoczynamy transakcję, żeby obie operacje (dodanie urlopu i anulowanie wizyt) wykonały się razem
     $pdo->beginTransaction();
 
-    // 1. Dodajemy urlop do tabeli dezaktywacje
     $sqlInsert = "INSERT INTO dezaktywacje (id_barbera, data_od, data_do) VALUES (:id_barbera, :data_od, :data_do)";
     $stmtInsert = $pdo->prepare($sqlInsert);
     $stmtInsert->bindParam(':id_barbera', $id_barbera);
@@ -49,8 +46,6 @@ try {
     $stmtInsert->bindParam(':data_do', $data_do);
     $stmtInsert->execute();
 
-    // 2. Automatycznie anulujemy wizyty w tym terminie dla tego barbera
-    // Musimy połączyć wizyty_users z usługami, żeby wiedzieć który barber wykonuje usługę
     $sqlUpdate = "
         UPDATE wizyty_users wu
         JOIN uslugi u ON wu.id_uslugi = u.id_uslugi
@@ -67,10 +62,8 @@ try {
     $stmtUpdate->bindParam(':data_do', $data_do);
     $stmtUpdate->execute();
 
-    // Pobieramy liczbę anulowanych wizyt, żeby poinformować frontend (opcjonalne)
     $deletedCount = $stmtUpdate->rowCount();
 
-    // Zatwierdzamy transakcję
     $pdo->commit();
 
     echo json_encode([
@@ -79,7 +72,6 @@ try {
     ]);
 
 } catch (PDOException $e) {
-    // W razie błędu cofamy zmiany
     $pdo->rollBack();
     http_response_code(500);
     echo json_encode(["success" => false, "error" => $e->getMessage()]);

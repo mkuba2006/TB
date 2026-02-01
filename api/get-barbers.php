@@ -19,7 +19,6 @@ if ($conn->connect_error) {
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
-    // Pobieramy tylko id_barbera i imie
     $result = $conn->query("SELECT id_barbera, imie FROM barberzy");
     if (!$result) {
         http_response_code(500);

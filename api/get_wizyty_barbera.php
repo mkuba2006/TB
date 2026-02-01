@@ -1,14 +1,12 @@
 <?php
-// WŁĄCZENIE WYŚWIETLANIA BŁĘDÓW (usuń na produkcji)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS"); // Oczekujemy POST z Reacta
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-// --- Obsługa żądania Preflight OPTIONS ---
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -16,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 header('Content-Type: application/json');
 
-// --- Konfiguracja bazy danych i szyfrowania ---
 $host = "localhost"; 
 $db   = "host574875_TEST";
 $user = "host574875_kuba";
@@ -28,7 +25,6 @@ $cipher = "AES-256-CBC";
 $iv_length = openssl_cipher_iv_length($cipher);
 $iv = substr(hash('sha256', $encryption_key), 0, $iv_length); 
 
-// --- Funkcja deszyfrująca ---
 function decrypt_data($encrypted_data, $key, $cipher, $iv) {
     if (empty($encrypted_data)) return "Brak Danych";
     $ciphertext = base64_decode($encrypted_data);
@@ -36,7 +32,6 @@ function decrypt_data($encrypted_data, $key, $cipher, $iv) {
     return ($decrypted === false) ? "Błąd Deszyfrowania" : $decrypted;
 }
 
-// --- Połączenie z bazą danych ---
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass); 
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
@@ -46,7 +41,6 @@ try {
     exit();
 }
 
-// Odbieranie ID Barbera z ciała POST
 $data = json_decode(file_get_contents("php://input"), true);
 $id_barbera = $data['id_barbera'] ?? null;
 
@@ -57,7 +51,6 @@ if (empty($id_barbera)) {
 }
 
 
-// --- Złożone Zapytanie SQL (Dla JEDNEGO barbera) ---
 $sql = "
     SELECT
         wu.id_wizyty,

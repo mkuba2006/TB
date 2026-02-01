@@ -2,11 +2,10 @@
 header("Access-Control-Allow-Origin: *");
 
 if (isset($_GET['file'])) {
-    $fileName = basename($_GET['file']); // basename dla bezpieczeństwa (zapobiega ../)
+    $fileName = basename($_GET['file']); 
     $filePath = "../faktury/" . $fileName;
 
     if (file_exists($filePath)) {
-        // Nagłówki wymuszające pobieranie
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
@@ -15,7 +14,6 @@ if (isset($_GET['file'])) {
         header('Pragma: public');
         header('Content-Length: ' . filesize($filePath));
         
-        // Odczyt i wysłanie pliku
         readfile($filePath);
         exit;
     } else {
